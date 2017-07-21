@@ -1,0 +1,25 @@
+{
+	"name": "axllent/silverstripe-ftsearch",
+	"description": "Flexible full-text searching for SilverStripe",
+	"type": "silverstripe-module",
+	"homepage": "https://github.com/axllent/silverstripe-ftsearch",
+	"keywords": ["silverstripe", "search", "fulltext"],
+	"license": "The MIT License (MIT)",
+	"authors": [
+		{
+			"name": "Ralph Slooten",
+			"homepage": "http://www.axllent.org/"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/axllent/silverstripe-ftsearch/issues"
+	},
+	"require": {
+		"silverstripe/framework": "^4.0@dev"
+	},
+    "autoload": {
+        "psr-4": {
+            "Axllent\\FTSearch\\": "src/"
+        }
+    }
+}
