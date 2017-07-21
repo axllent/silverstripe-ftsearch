@@ -9,12 +9,12 @@ and allows you to include and DataObject's relations (has_one, has_many, many_ma
 
 ## Features
 
-- Easily determine which DataObjects to automatically "index"
+- Easily determine which DataObjects to automatically index
 - Include object relations (has_one, has_many, many_many, belongs_to etc)
 - Supports `Versioned` DataObjects
-- Full-text weight [search index has two fields, `SearchTitle` & `SearchContent`]
-- Saving/deleting, publishing, unpublishing of indexed or relating DataObjects triggers re-index of DataObject / relating DataObjects
-- Search results return an ArrayList with SearchTitle, SearchContent, Excerpt (optionally highlighted to set length), and the original Record
+- Full-text weight - search index has two fields, `SearchTitle` & `SearchContent`
+- Saving/deleting, publishing, unpublishing of indexed or relating DataObjects triggers re-index of DataObject
+- Search results return an `ArrayList` with `SearchTitle`, `SearchContent`, `Excerpt` (optionally highlighted to set length), `Link`, and the original `Object`
 - BuildTask to manually re-populate your search database based on your configuration
 
 It does not include a search interface / controller as this is generally custom, and easy to implement in your controller (see [Searching the Database](docs/en/Searching-the-Database.md)).
