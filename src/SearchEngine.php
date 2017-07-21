@@ -95,15 +95,13 @@ class SearchEngine
             $record->ObjectClass = $row['ObjectClass'];
             $search_title = FTSearchLib::Highlight(htmlspecialchars($row['SearchTitle']), $search);
             $record->SearchTitle = DBHTMLText::create()->setValue($search_title);
+            $record->SearchContent = $row['SearchContent'];
             $record->Link = $do->Link();
-
             $search_excerpt = FTSearchLib::Highlight(
                 htmlspecialchars(
                     FTSearchLib::excerpt($row['SearchContent'], $search, $excerpt_length, $excerpt_ending)
                 ), $search
             );
-
-            $record->SearchContent = $row['SearchContent'];
             $record->Excerpt = DBHTMLText::create()->setValue($search_excerpt);
             $record->Object = $do;
             $result->push($record);
