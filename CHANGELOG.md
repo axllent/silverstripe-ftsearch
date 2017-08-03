@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [1.0.1]
+
+- Skip if object is not a database record
+
+
 ## [1.0.0]
 
 - Initial release
