@@ -132,20 +132,22 @@ class FTSearchLib
                 }
                 $obj = self::getLiveVersionObject($obj);
 
+                if (!$obj) {
+                    return; // not a database record
+                }
+
                 $ft_data = [];
 
-                if ($obj) {
-                    if (
-                        (!isset($obj->ShowInSearch) || $obj->ShowInSearch)
-                        && !in_array($obj->ClassName, $exclude_classes)
-                        && ClassInfo::hasMethod($obj, 'Link')
-                    ) {
-                        foreach ($fields as $field) {
-                            if (ClassInfo::hasMethod($obj, $field)) {
-                                $ft_data[] = self::cleanText($obj->$field());
-                            } else {
-                                $ft_data[] = self::cleanText($obj->$field);
-                            }
+                if (
+                    (!isset($obj->ShowInSearch) || $obj->ShowInSearch)
+                    && !in_array($obj->ClassName, $exclude_classes)
+                    && ClassInfo::hasMethod($obj, 'Link')
+                ) {
+                    foreach ($fields as $field) {
+                        if (ClassInfo::hasMethod($obj, $field)) {
+                            $ft_data[] = self::cleanText($obj->$field());
+                        } else {
+                            $ft_data[] = self::cleanText($obj->$field);
                         }
                     }
                 }
