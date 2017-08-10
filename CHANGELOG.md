@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [1.0.2]
+
+- Skip when ClassName isn't set
+
+
 ## [1.0.1]
 
 - Skip if object is not a database record
