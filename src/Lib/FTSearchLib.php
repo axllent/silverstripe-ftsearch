@@ -76,6 +76,9 @@ class FTSearchLib
 
     public static function removeFromFTSearchDB($obj)
     {
+        if (!$obj->ClassName) {
+            return false;
+        }
         $so = FTSearch::get()->Filter([
             'ObjectClass' => $obj->ClassName,
             'ObjectID' => $obj->ID
@@ -87,6 +90,9 @@ class FTSearchLib
 
     public static function triggerLinkedObjects($obj)
     {
+        if (!$obj->ClassName) {
+            return false;
+        }
         if ($hasOne = $obj->hasOne()) {
             foreach ($hasOne as $relationship => $class) {
                 if ($obj->$relationship()->hasMethod('updateFTSearch')) {
@@ -132,7 +138,7 @@ class FTSearchLib
                 }
                 $obj = self::getLiveVersionObject($obj);
 
-                if (!$obj) {
+                if (!$obj || !$obj->ClassName) {
                     return; // not a database record
                 }
 

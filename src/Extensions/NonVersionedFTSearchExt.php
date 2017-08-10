@@ -12,11 +12,11 @@ class NonVersionedFTSearchExt extends DataExtension
         FTSearchLib::updateSearchRecord($this->owner);
     }
 
-    // Remove from DB if class has changed
+    // Remove from DB if ClassName has changed
     public function onBeforeWrite()
     {
         $original = FTSearchLib::getLiveVersionObject($this->owner);
-        if ($original->ClassName != $this->owner->ClassName) {
+        if ($original && $original->ClassName != $this->owner->ClassName) {
             FTSearchLib::removeFromFTSearchDB($original);
         }
     }
