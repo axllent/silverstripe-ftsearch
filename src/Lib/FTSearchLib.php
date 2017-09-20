@@ -189,6 +189,7 @@ class FTSearchLib
     public static function cleanText($str)
     {
         $str = preg_replace('/(<\/[0-9a-z]+>|<br\s?\/?>)/i', " ", $str);
+        $str = preg_replace('/\[image src="[^\]]*\]/', '', $str); // remove images
         return html_entity_decode(strip_tags($str));
     }
 }
