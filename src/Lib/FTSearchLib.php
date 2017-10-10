@@ -10,7 +10,7 @@ use SilverStripe\Versioned\Versioned;
 
 class FTSearchLib
 {
-    public static function Excerpt($text, $phrase, $radius = 100, $ending = "...")
+    public static function Excerpt($text, $phrase, $radius = 100, $ending = '...')
     {
         $phraseLen = strlen($phrase);
         if ($radius < $phraseLen) {
@@ -57,7 +57,7 @@ class FTSearchLib
         }
         $q = explode(' ', str_replace(array('','\\','+','*','?','[','^',']','$','(',')','{','}','=','!','<','>','|',':','#','-','_'), '', $q));
         for ($i=0; $i < sizeOf($q); $i++) {
-            $c = preg_replace("/($q[$i])(?![^<]*>)/i", "<span class=\"" . htmlspecialchars($excerpt_css_class) . "\">\${1}</span>", $c);
+            $c = preg_replace('/(' . preg_quote($q[$i], '/') . ')(?![^<]*>)/i', '<span class="' . htmlspecialchars($excerpt_css_class) . '">${1}</span>', $c);
         }
         return $c;
     }
@@ -188,7 +188,7 @@ class FTSearchLib
 
     public static function cleanText($str)
     {
-        $str = preg_replace('/(<\/[0-9a-z]+>|<br\s?\/?>)/i', " ", $str);
+        $str = preg_replace('/(<\/[0-9a-z]+>|<br\s?\/?>)/i', ' ', $str);
         $str = preg_replace('/\[image src="[^\]]*\]/', '', $str); // remove images
         return html_entity_decode(strip_tags($str));
     }
