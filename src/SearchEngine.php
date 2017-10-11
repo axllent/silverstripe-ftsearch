@@ -136,25 +136,33 @@ class SearchEngine
 
                 if ($hasOne = $do->hasOne()) {
                     foreach ($hasOne as $relationship => $class) {
-                        self::attachFTSearchTrigger($class);
+                        if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
+                            self::attachFTSearchTrigger($class);
+                        }
                     }
                 }
 
                 if ($hasMany = $do->hasMany()) {
                     foreach ($hasMany as $relationship => $class) {
-                        self::attachFTSearchTrigger($class);
+                        if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
+                            self::attachFTSearchTrigger($class);
+                        }
                     }
                 }
 
                 if ($manyMany = $do->manyMany()) {
                     foreach ($manyMany as $relationship => $class) {
-                        self::attachFTSearchTrigger($class);
+                        if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
+                            self::attachFTSearchTrigger($class);
+                        }
                     }
                 }
 
                 if ($belongsTo = $do->belongsTo()) {
                     foreach ($belongsTo as $relationship => $class) {
-                        self::attachFTSearchTrigger($class);
+                        if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
+                            self::attachFTSearchTrigger($class);
+                        }
                     }
                 }
             }
