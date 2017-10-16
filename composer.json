@@ -1,7 +1,7 @@
 {
 	"name": "axllent/silverstripe-ftsearch",
 	"description": "Flexible full-text searching for SilverStripe",
-	"type": "silverstripe-module",
+	"type": "silverstripe-vendormodule",
 	"homepage": "https://github.com/axllent/silverstripe-ftsearch",
 	"keywords": ["silverstripe", "search", "fulltext"],
 	"license": "The MIT License (MIT)",

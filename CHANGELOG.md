@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [1.0.6]
+
+- Switch to silverstripe-vendormodule
+
+
 ## [1.0.5]
 
 - Ensure classname exists when attaching search trigger
