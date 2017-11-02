@@ -17,7 +17,7 @@ class FTSearchLib
             $radius = $phraseLen;
         }
 
-        $phrases = explode(' ', $phrase);
+        $phrases = preg_split('/\s/', $phrase, -1, PREG_SPLIT_NO_EMPTY);
 
         foreach ($phrases as $phrase) {
             $pos = strpos(strtolower($text), strtolower($phrase));
