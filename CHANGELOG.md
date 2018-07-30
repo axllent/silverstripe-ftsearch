@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [1.0.8]
+
+- Add check for $do->manyMany() returning nested array
+
+
 ## [1.0.7]
 
 - Use preg_split to prevent empty strings

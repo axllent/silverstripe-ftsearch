@@ -136,6 +136,9 @@ class SearchEngine
 
                 if ($hasOne = $do->hasOne()) {
                     foreach ($hasOne as $relationship => $class) {
+                        if (!is_string($class)) {
+                            continue;
+                        }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
                             self::attachFTSearchTrigger($class);
                         }
@@ -144,6 +147,9 @@ class SearchEngine
 
                 if ($hasMany = $do->hasMany()) {
                     foreach ($hasMany as $relationship => $class) {
+                        if (!is_string($class)) {
+                            continue;
+                        }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
                             self::attachFTSearchTrigger($class);
                         }
@@ -152,6 +158,9 @@ class SearchEngine
 
                 if ($manyMany = $do->manyMany()) {
                     foreach ($manyMany as $relationship => $class) {
+                        if (!is_string($class)) {
+                            continue;
+                        }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
                             self::attachFTSearchTrigger($class);
                         }
@@ -160,6 +169,9 @@ class SearchEngine
 
                 if ($belongsTo = $do->belongsTo()) {
                     foreach ($belongsTo as $relationship => $class) {
+                        if (!is_string($class)) {
+                            continue;
+                        }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
                             self::attachFTSearchTrigger($class);
                         }
