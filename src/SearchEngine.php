@@ -156,11 +156,8 @@ class SearchEngine
 
         foreach ($data_objects as $classname => $fields) {
             if (isset($all_classes[strtolower($classname)]) && !in_array($classname, $exclude_classes)) {
-                if (DataObject::has_extension($classname, Versioned::class)) {
-                    $ext_prefix = 'Versioned';
-                } else {
-                    $ext_prefix = 'NonVersioned';
-                }
+                // detect which class we should extend with
+                $ext_prefix = DataObject::has_extension($classname, Versioned::class) ? 'Versioned' : 'NonVersioned';
 
                 $classname::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchExt');
 
@@ -220,12 +217,12 @@ class SearchEngine
      *
      * @return void
      */
-    private static function _attachFTSearchTrigger($class_name)
+    private static function _attachFTSearchTrigger($classname)
     {
-        $ext_prefix = DataObject::has_extension($class_name, Versioned::class) ? 'Versioned' : 'NonVersioned';
+        $ext_prefix = DataObject::has_extension($classname, Versioned::class) ? 'Versioned' : 'NonVersioned';
 
-        if (!DataObject::has_extension($class_name, 'Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt')) {
-            $class_name::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt');
+        if (!DataObject::has_extension($classname, 'Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt')) {
+            $classname::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt');
         }
     }
 }
