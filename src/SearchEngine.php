@@ -1,5 +1,4 @@
 <?php
-
 namespace Axllent\FTSearch;
 
 use Axllent\FTSearch\Lib\FTSearchLib;
@@ -7,17 +6,22 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Convert;
 use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\Queries\SQLSelect;
+use SilverStripe\Versioned\Versioned;
 use SilverStripe\View\ViewableData;
 
 class SearchEngine
 {
     /**
-     * @Config
+     * @var Array
      */
     private static $data_objects = [];
 
+    /**
+     * @var Array
+     */
     private static $exclude_classes = [
         'SilverStripe\Assets\Folder',
         'SilverStripe\CMS\Model\RedirectorPage',
@@ -25,36 +29,62 @@ class SearchEngine
         'SilverStripe\ErrorPage\ErrorPage',
     ];
 
+    /**
+     * @var Int
+     */
     private static $search_limit = 1000;
 
+    /**
+     * @var Int
+     */
     private static $title_score = 2;
 
+    /**
+     * @var Int
+     */
     private static $content_score = 2;
 
+    /**
+     * @var Int
+     */
     private static $excerpt_length = 200;
 
+    /**
+     * @var String
+     */
     private static $excerpt_ending = '...';
 
+    /**
+     * @var String
+     */
     private static $excerpt_css_class = 'highlight';
 
-
-    public static function Search($search = false, $classnames = [])
+    /**
+     * Search function
+     *
+     * @param String $search     fulltext search string
+     * @param Array  $classnames optional array of classnames to search
+     *
+     * @return ArrayList
+     */
+    public static function search($search = false, $classnames = [])
     {
-        $search_limit = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'search_limit');
-        $title_score = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'title_score');
-        $content_score = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'content_score');
-        $min_score = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'min_score');
-        $excerpt_length = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'excerpt_length');
-        $excerpt_ending = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'excerpt_ending');
-        $excerpt_css_class = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'excerpt_css_class');
+        $search_limit      = Config::inst()->get(self::class, 'search_limit');
+        $title_score       = Config::inst()->get(self::class, 'title_score');
+        $content_score     = Config::inst()->get(self::class, 'content_score');
+        $min_score         = Config::inst()->get(self::class, 'min_score');
+        $excerpt_length    = Config::inst()->get(self::class, 'excerpt_length');
+        $excerpt_ending    = Config::inst()->get(self::class, 'excerpt_ending');
+        $excerpt_css_class = Config::inst()->get(self::class, 'excerpt_css_class');
 
         $search_string = Convert::raw2sql($search);
-        $query = new SQLSelect();
+        $query         = new SQLSelect();
         $query->setFrom('FTSearch');
-        $query->selectField('
-            (MATCH("SearchTitle") AGAINST(\'' . $search_string . '\') * ' . $title_score . ') +
-			(MATCH("SearchContent") AGAINST(\'' . $search_string . '\') * ' . $content_score . ') AS Score
-		');
+        $query->selectField(
+            '(MATCH("SearchTitle") AGAINST(\'' . $search_string . '\') * ' . $title_score . ') +
+            (MATCH("SearchContent") AGAINST(\'' . $search_string . '\') * ' . $content_score . ')
+            AS Score'
+        );
 
         $query->setWhere('MATCH("SearchTitle","SearchContent") AGAINST(\'' . $search_string . '\' IN BOOLEAN MODE)');
 
@@ -68,7 +98,7 @@ class SearchEngine
             } else {
                 $add_where = "'" . Convert::raw2sql($classnames) . "'";
             }
-            $query->addWhere("\"ObjectClass\" IN (" . $add_where . ")");
+            $query->addWhere('"ObjectClass" IN (' . $add_where . ')');
         }
 
         $query->setOrderBy('"Score" DESC');
@@ -90,20 +120,20 @@ class SearchEngine
             if (!$do) {
                 continue; // result doesn't exist?
             }
-            $record = ViewableData::create();
-            $record->Score = $row['Score'];
-            $record->ObjectClass = $row['ObjectClass'];
-            $search_title = FTSearchLib::Highlight(htmlspecialchars($row['SearchTitle']), $search);
-            $record->SearchTitle = DBHTMLText::create()->setValue($search_title);
+            $record                = ViewableData::create();
+            $record->Score         = $row['Score'];
+            $record->ObjectClass   = $row['ObjectClass'];
+            $search_title          = FTSearchLib::Highlight(htmlspecialchars($row['SearchTitle']), $search);
+            $record->SearchTitle   = DBHTMLText::create()->setValue($search_title);
             $record->SearchContent = $row['SearchContent'];
-            $record->Link = $do->Link();
-            $search_excerpt = FTSearchLib::Highlight(
+            $record->Link          = $do->Link();
+            $search_excerpt        = FTSearchLib::Highlight(
                 htmlspecialchars(
                     FTSearchLib::excerpt($row['SearchContent'], $search, $excerpt_length, $excerpt_ending)
                 ), $search
             );
             $record->Excerpt = DBHTMLText::create()->setValue($search_excerpt);
-            $record->Object = $do;
+            $record->Object  = $do;
             $result->push($record);
         }
 
@@ -115,18 +145,18 @@ class SearchEngine
      * Attaches multiple extensions (workers or triggers)
      * based on whether object is versioned or not.
      * Also attached to every relating dataobject (has_one, has_many etc).
+     *
+     * @return void
      */
     public static function attachFTSearchListener()
     {
-        $all_classes = ClassInfo::allClasses();
-        $data_objects = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'data_objects');
-        $exclude_classes = Config::inst()->get('Axllent\\FTSearch\\SearchEngine', 'exclude_classes');
+        $all_classes     = ClassInfo::allClasses();
+        $data_objects    = Config::inst()->get(self::class, 'data_objects');
+        $exclude_classes = Config::inst()->get(self::class, 'exclude_classes');
 
         foreach ($data_objects as $classname => $fields) {
             if (isset($all_classes[strtolower($classname)]) && !in_array($classname, $exclude_classes)) {
-                $do = singleton($classname);
-
-                if ($do->hasExtension('SilverStripe\\Versioned\\Versioned')) {
+                if (DataObject::has_extension($classname, Versioned::class)) {
                     $ext_prefix = 'Versioned';
                 } else {
                     $ext_prefix = 'NonVersioned';
@@ -134,13 +164,15 @@ class SearchEngine
 
                 $classname::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchExt');
 
+                $do = DataObject::singleton($classname);
+
                 if ($hasOne = $do->hasOne()) {
                     foreach ($hasOne as $relationship => $class) {
                         if (!is_string($class)) {
                             continue;
                         }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
-                            self::attachFTSearchTrigger($class);
+                            self::_attachFTSearchTrigger($class);
                         }
                     }
                 }
@@ -151,7 +183,7 @@ class SearchEngine
                             continue;
                         }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
-                            self::attachFTSearchTrigger($class);
+                            self::_attachFTSearchTrigger($class);
                         }
                     }
                 }
@@ -162,7 +194,7 @@ class SearchEngine
                             continue;
                         }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
-                            self::attachFTSearchTrigger($class);
+                            self::_attachFTSearchTrigger($class);
                         }
                     }
                 }
@@ -173,7 +205,7 @@ class SearchEngine
                             continue;
                         }
                         if (isset($all_classes[strtolower($class)]) && !in_array($class, $exclude_classes)) {
-                            self::attachFTSearchTrigger($class);
+                            self::_attachFTSearchTrigger($class);
                         }
                     }
                 }
@@ -181,16 +213,19 @@ class SearchEngine
         }
     }
 
-    private static function attachFTSearchTrigger($class_name)
+    /**
+     * Attach a trigger to fire index updated when modified
+     *
+     * @param String $class_name class name
+     *
+     * @return void
+     */
+    private static function _attachFTSearchTrigger($class_name)
     {
-        $class = singleton($class_name);
-        if ($class->hasExtension('SilverStripe\\Versioned\\Versioned')) {
-            $ext_prefix = 'Versioned';
-        } else {
-            $ext_prefix = 'NonVersioned';
-        }
-        if (!$class->hasExtension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt')) {
-            $class::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt');
+        $ext_prefix = DataObject::has_extension($class_name, Versioned::class) ? 'Versioned' : 'NonVersioned';
+
+        if (!DataObject::has_extension($class_name, 'Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt')) {
+            $class_name::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt');
         }
     }
 }
