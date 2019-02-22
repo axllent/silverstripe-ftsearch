@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file.
 
+## [1.1.0]
+
+- Prevent issues in some cases with SilverStripe >=4.2.2
+
+
 ## [1.0.8]
 
 - Add check for $do->manyMany() returning nested array
