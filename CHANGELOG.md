@@ -1,6 +1,9 @@
 # Changelog
 
-Notable changes to this project will be documented in this file.
+## [1.1.1]
+
+- Looser image shorttag matching due to syntax changes in upgraded websites
+
 
 ## [1.1.0]
 
