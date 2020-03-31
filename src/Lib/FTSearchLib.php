@@ -250,8 +250,10 @@ class FTSearchLib
      */
     public static function cleanText($str)
     {
+        // manually remove p, table, span etc tags
         $str = preg_replace('/(<\/[0-9a-z]+>|<br\s?\/?>)/i', ' ', $str);
-        $str = preg_replace('/\[image src="[^\]]*\]/', '', $str); // remove images
+        // remove images
+        $str = preg_replace('/\[image (class|src|title)="[^\]]*\]/', '', $str);
 
         return html_entity_decode(strip_tags($str));
     }
