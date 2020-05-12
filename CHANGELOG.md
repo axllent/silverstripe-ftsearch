@@ -2,7 +2,7 @@
 
 ## [1.1.2]
 
-- Prevent memory exhaustion due to extremely long searches (limit 150 chars)
+- Limit extremely long searches to 150 characters (limit 150 chars)
 
 
 ## [1.1.1]
