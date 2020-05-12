@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.2]
+
+- Prevent memory exhaustion due to extremely long searches (limit 150 chars)
+
+
 ## [1.1.1]
 
 - Looser image shorttag matching due to syntax changes in upgraded websites
