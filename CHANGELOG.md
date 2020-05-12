@@ -2,7 +2,7 @@
 
 ## [1.1.2]
 
-- Limit extremely long searches to 150 characters (limit 150 chars)
+- Limit extremely long searches to 150 characters
 
 
 ## [1.1.1]
