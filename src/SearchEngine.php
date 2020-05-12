@@ -15,12 +15,16 @@ use SilverStripe\View\ViewableData;
 class SearchEngine
 {
     /**
-     * @var Array
+     * Dataobjects to index
+     *
+     * @var array
      */
     private static $data_objects = [];
 
     /**
-     * @var Array
+     * Exclude classes
+     *
+     * @var array
      */
     private static $exclude_classes = [
         'SilverStripe\Assets\Folder',
@@ -30,40 +34,52 @@ class SearchEngine
     ];
 
     /**
-     * @var Int
+     * Search limit for results
+     *
+     * @var int
      */
     private static $search_limit = 1000;
 
     /**
-     * @var Int
+     * Score weight for title
+     *
+     * @var int
      */
     private static $title_score = 2;
 
     /**
-     * @var Int
+     * Scor weight for content
+     *
+     * @var int
      */
     private static $content_score = 2;
 
     /**
-     * @var Int
+     * Length of excerpt
+     *
+     * @var int
      */
     private static $excerpt_length = 200;
 
     /**
-     * @var String
+     * End excerpts with...
+     *
+     * @var string
      */
     private static $excerpt_ending = '...';
 
     /**
-     * @var String
+     * CSS class to apply to mathing words in excerpt
+     *
+     * @var string
      */
     private static $excerpt_css_class = 'highlight';
 
     /**
      * Search function
      *
-     * @param String $search     fulltext search string
-     * @param Array  $classnames optional array of classnames to search
+     * @param string $search     fulltext search string
+     * @param array  $classnames optional array of classnames to search
      *
      * @return ArrayList
      */
@@ -218,15 +234,20 @@ class SearchEngine
     /**
      * Attach a trigger to fire index updated when modified
      *
-     * @param String $class_name class name
+     * @param string $classname class name
      *
      * @return void
      */
     private static function _attachFTSearchTrigger($classname)
     {
-        $ext_prefix = DataObject::has_extension($classname, Versioned::class) ? 'Versioned' : 'NonVersioned';
+        $ext_prefix = DataObject::has_extension($classname, Versioned::class)
+        ? 'Versioned' : 'NonVersioned';
 
-        if (!DataObject::has_extension($classname, 'Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt')) {
+        if (!DataObject::has_extension(
+            $classname,
+            'Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt'
+        )
+        ) {
             $classname::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt');
         }
     }
