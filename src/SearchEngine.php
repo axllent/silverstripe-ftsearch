@@ -77,6 +77,11 @@ class SearchEngine
         $excerpt_ending    = Config::inst()->get(self::class, 'excerpt_ending');
         $excerpt_css_class = Config::inst()->get(self::class, 'excerpt_css_class');
 
+        // prevent memory exhaustion
+        if (strlen($search) > 150) {
+            $search = substr($search, 0, 150);
+        }
+
         $search_string = Convert::raw2sql($search);
         $query         = new SQLSelect();
         $query->setFrom('FTSearch');
