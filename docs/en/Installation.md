@@ -3,7 +3,7 @@
 FTSearch can be installed with composer:
 
 ```shell
-composer install axllent/silverstripe-ftsearch
+composer require axllent/silverstripe-ftsearch
 ```
 
 After installing the module don't forget to run a ``?flush`.
