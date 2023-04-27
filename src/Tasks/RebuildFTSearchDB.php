@@ -1,4 +1,5 @@
 <?php
+
 namespace Axllent\FTSearch\Tasks;
 
 use Axllent\FTSearch\SearchEngine;
@@ -12,38 +13,35 @@ use SilverStripe\ORM\DB;
 class RebuildFTSearchDB extends BuildTask
 {
     /**
-     * @var String
+     * @var string
      */
     private static $segment = 'RebuildFTSearchDB';
 
     /**
-     * @var String
+     * @var string
      */
     protected $title = 'Rebuild FTSearch Table';
 
     /**
-     * @var String
+     * @var string
      */
     protected $description = 'Empties & rebuilds the entire FTSearch database table';
 
     /**
-     * @var Array
+     * @var array
      */
     protected static $completed = [];
 
-    /**
-     * @param $request
-     */
     public function run($request)
     {
         $data_objects    = Config::inst()->get(SearchEngine::class, 'data_objects');
         $exclude_classes = Config::inst()->get(SearchEngine::class, 'exclude_classes');
 
-        print '<ul>';
+        echo '<ul>';
 
         DB::query('TRUNCATE FTSearch');
 
-        print '<li>Truncated FTSearch</li>';
+        echo '<li>Truncated FTSearch</li>';
 
         $cnt = 0;
 
@@ -57,11 +55,11 @@ class RebuildFTSearchDB extends BuildTask
                     }
                     self::$completed[] = $unique_id;
                     $obj->updateFTSearch();
-                    $cnt++;
+                    ++$cnt;
                 }
             }
         }
 
-        print '<li>Inserted ' . $cnt . ' records.</li></lu>';
+        echo '<li>Inserted ' . $cnt . ' records.</li></lu>';
     }
 }

@@ -1,6 +1,6 @@
-# Flexible Full-Text Search for SilverStripe
+# Flexible Full-Text Search for Silverstripe
 
-FTSearch enables you to easily build your own custom full-text search of all/any of your SilverStripe
+FTSearch enables you to easily build your own custom full-text search of all/any of your Silverstripe
 website's pages and/or DataObjects.
 
 It generally requires no modifications to your code (see [Configuration](docs/en/Configuration.md)),
@@ -22,7 +22,7 @@ It does not include a search interface / controller as this is generally custom,
 
 ## Requirements
 
-- SilverStripe ^4
+- Silverstripe ^4 || ^5
 - MySQL or MariaDB as your database engine
 
 

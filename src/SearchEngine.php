@@ -1,4 +1,5 @@
 <?php
+
 namespace Axllent\FTSearch;
 
 use Axllent\FTSearch\Lib\FTSearchLib;
@@ -151,7 +152,8 @@ class SearchEngine
             $search_excerpt        = FTSearchLib::Highlight(
                 htmlspecialchars(
                     FTSearchLib::excerpt($row['SearchContent'], $search, $excerpt_length, $excerpt_ending)
-                ), $search
+                ),
+                $search
             );
             $record->Excerpt = DBHTMLText::create()->setValue($search_excerpt);
             $record->Object  = $do;

@@ -1,4 +1,5 @@
 <?php
+
 namespace Axllent\FTSearch\Model;
 
 use SilverStripe\ORM\DataObject;
@@ -8,14 +9,19 @@ use SilverStripe\ORM\DataObject;
  */
 class FTSearch extends DataObject
 {
-
     /**
-     * @var String
+     * Table name
+     *
+     * @var string
      */
     private static $table_name = 'FTSearch';
 
     /**
-     * @var Array
+     * Database field definitions
+     *
+     * @var array
+     *
+     * @config
      */
     private static $db = [
         'ObjectClass'   => 'Varchar(100)',
@@ -25,14 +31,16 @@ class FTSearch extends DataObject
     ];
 
     /**
-     * @var Array
+     * Additional table indexes
+     *
+     * @var array
      */
     private static $indexes = [
-        'LookupIdx'       => [
+        'LookupIdx' => [
             'type'    => 'unique',
             'columns' => ['ObjectClass', 'ObjectID'],
         ],
-        'FulltextTitle'   => [
+        'FulltextTitle' => [
             'type'    => 'fulltext',
             'columns' => ['SearchTitle'],
         ],
@@ -40,17 +48,18 @@ class FTSearch extends DataObject
             'type'    => 'fulltext',
             'columns' => ['SearchContent'],
         ],
-        'Fulltext'        => [
+        'Fulltext' => [
             'type'    => 'fulltext',
             'columns' => ['SearchTitle', 'SearchContent'],
         ],
     ];
 
     /**
-     * @var Array
+     * Table create options
+     *
+     * @var array
      */
     private static $create_table_options = [
         'MySQLDatabase' => 'ENGINE=MyISAM',
     ];
-
 }

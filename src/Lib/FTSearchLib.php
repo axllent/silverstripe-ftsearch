@@ -1,4 +1,5 @@
 <?php
+
 namespace Axllent\FTSearch\Lib;
 
 use Axllent\FTSearch\Model\FTSearch;
@@ -13,15 +14,17 @@ class FTSearchLib
     /**
      * Return a search result excerpt
      *
-     * @param String $text   Search result text
-     * @param String $phrase Search phrase
-     * @param Int    $radius Radius of letters on either side of match
-     * @param String $ending Truncate end string
+     * @param string $text   Search result text
+     * @param string $phrase Search phrase
+     * @param int    $radius Radius of letters on either side of match
+     * @param string $ending Truncate end string
      *
      * @return mixed
      */
     public static function excerpt($text, $phrase, $radius = 100, $ending = '...')
     {
+        $text      = strval($text);
+        $phrase    = strval($phrase);
         $phraseLen = strlen($phrase);
         if ($radius < $phraseLen) {
             $radius = $phraseLen;
@@ -49,7 +52,7 @@ class FTSearchLib
         }
 
         $excerpt = substr($text, $startPos, $endPos - $startPos);
-        if ($startPos != 0) {
+        if (0 != $startPos) {
             $excerpt = substr_replace($excerpt, $ending, 0, $phraseLen);
         }
 
@@ -63,19 +66,37 @@ class FTSearchLib
     /**
      * Highlight words
      *
-     * @param String $c String to highlight
-     * @param String $q Search words
+     * @param string $c String to highlight
+     * @param string $q Search words
+     *
      * @return mixed
      */
     public static function highlight($c, $q)
     {
+        $c = strval($c);
+        $q = strval($q);
+
         $excerpt_css_class = Config::inst()->get(SearchEngine::class, 'excerpt_css_class');
         if (!$excerpt_css_class) {
             return $c;
         }
-        $q = explode(' ', str_replace(['', '\\', '+', '*', '?', '[', '^', ']', '$', '(', ')', '{', '}', '=', '!', '<', '>', '|', ':', '#', '-', '_'], '', $q));
-        for ($i = 0; $i < sizeOf($q); $i++) {
-            $c = preg_replace('/(' . preg_quote($q[$i], '/') . ')(?![^<]*>)/i', '<span class="' . htmlspecialchars($excerpt_css_class) . '">${1}</span>', $c);
+        $q = explode(
+            ' ',
+            str_replace(
+                [
+                    '', '\\', '+', '*', '?', '[', '^', ']', '$', '(', ')',
+                    '{', '}', '=', '!', '<', '>', '|', ':', '#', '-', '_',
+                ],
+                '',
+                $q
+            )
+        );
+        for ($i = 0; $i < sizeof($q); ++$i) {
+            $c = preg_replace(
+                '/(' . preg_quote($q[$i], '/') . ')(?![^<]*>)/i',
+                '<span class="' . htmlspecialchars($excerpt_css_class) . '">${1}</span>',
+                $c
+            );
         }
 
         return $c;
@@ -91,13 +112,13 @@ class FTSearchLib
     public static function getLiveVersionObject($obj)
     {
         if ($obj->hasExtension(Versioned::class)) {
-            $baseTable  = ClassInfo::baseDataClass($obj);
-            $table_name = DataObject::getSchema()->tableName($baseTable);
+            $baseClass = DataObject::getSchema()->baseDataClass($obj->ClassName);
+            $table     = DataObject::getSchema()->tableName($baseClass);
 
             return Versioned::get_one_by_stage(
-                $baseTable,
+                $baseClass,
                 Versioned::LIVE,
-                [sprintf('"%s"."ID" = %d', $table_name, $obj->ID)]
+                [sprintf('"%s"."ID" = %d', $table, $obj->ID)]
             );
         }
 
@@ -141,29 +162,29 @@ class FTSearchLib
         }
         if ($hasOne = $obj->hasOne()) {
             foreach ($hasOne as $relationship => $class) {
-                if ($obj->$relationship()->hasMethod('updateFTSearch')) {
-                    $obj->$relationship()->updateFTSearch();
+                if ($obj->{$relationship}()->hasMethod('updateFTSearch')) {
+                    $obj->{$relationship}()->updateFTSearch();
                 }
             }
         }
         if ($hasMany = $obj->hasMany()) {
             foreach ($hasMany as $relationship => $class) {
-                if ($obj->$relationship()->hasMethod('updateFTSearch')) {
-                    $obj->$relationship()->updateFTSearch();
+                if ($obj->{$relationship}()->hasMethod('updateFTSearch')) {
+                    $obj->{$relationship}()->updateFTSearch();
                 }
             }
         }
         if ($manyMany = $obj->manyMany()) {
             foreach ($manyMany as $relationship => $class) {
-                if ($obj->$relationship()->hasMethod('updateFTSearch')) {
-                    $obj->$relationship()->updateFTSearch();
+                if ($obj->{$relationship}()->hasMethod('updateFTSearch')) {
+                    $obj->{$relationship}()->updateFTSearch();
                 }
             }
         }
         if ($belongsTo = $obj->belongsTo()) {
             foreach (array_keys($belongsTo) as $relationship) {
-                if ($obj->$relationship()->hasMethod('updateFTSearch')) {
-                    $obj->$relationship()->updateFTSearch();
+                if ($obj->{$relationship}()->hasMethod('updateFTSearch')) {
+                    $obj->{$relationship}()->updateFTSearch();
                 }
             }
         }
@@ -203,9 +224,9 @@ class FTSearchLib
                 ) {
                     foreach ($fields as $field) {
                         if (ClassInfo::hasMethod($obj, $field)) {
-                            $ft_data[] = self::cleanText($obj->$field());
+                            $ft_data[] = self::cleanText($obj->{$field}());
                         } else {
-                            $ft_data[] = self::cleanText($obj->$field);
+                            $ft_data[] = self::cleanText($obj->{$field});
                         }
                     }
                 }
@@ -223,7 +244,8 @@ class FTSearchLib
                     }
 
                     return false;
-                } elseif (!$so) {
+                }
+                if (!$so) {
                     $so = FTSearch::create();
                 }
 
@@ -244,14 +266,14 @@ class FTSearchLib
     /**
      * Clean text, remove html
      *
-     * @param String $str String to clean
+     * @param string $str String to clean
      *
-     * @return String
+     * @return string
      */
     public static function cleanText($str)
     {
         // manually remove p, table, span etc tags
-        $str = preg_replace('/(<\/[0-9a-z]+>|<br\s?\/?>)/i', ' ', $str);
+        $str = preg_replace('/(<\/[0-9a-z]+>|<br\s?\/?>)/i', ' ', strval($str));
         // remove images
         $str = preg_replace('/\[image (class|src|title)="[^\]]*\]/', '', $str);
 
