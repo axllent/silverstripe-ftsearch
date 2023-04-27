@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.0]
+
+- Support for Silverstripe 5
+
+
 ## [1.1.2]
 
 - Limit extremely long searches to 150 characters
@@ -12,7 +17,7 @@
 
 ## [1.1.0]
 
-- Prevent issues in some cases with SilverStripe >=4.2.2
+- Prevent issues in some cases with Silverstripe >=4.2.2
 
 
 ## [1.0.8]
