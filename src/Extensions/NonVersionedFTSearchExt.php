@@ -3,9 +3,9 @@
 namespace Axllent\FTSearch\Extensions;
 
 use Axllent\FTSearch\Lib\FTSearchLib;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 
-class NonVersionedFTSearchExt extends DataExtension
+class NonVersionedFTSearchExt extends Extension
 {
     public function updateFTSearch()
     {

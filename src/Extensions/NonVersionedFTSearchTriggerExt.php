@@ -3,9 +3,9 @@
 namespace Axllent\FTSearch\Extensions;
 
 use Axllent\FTSearch\Lib\FTSearchLib;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 
-class NonVersionedFTSearchTriggerExt extends DataExtension
+class NonVersionedFTSearchTriggerExt extends Extension
 {
     public function onAfterWrite()
     {
