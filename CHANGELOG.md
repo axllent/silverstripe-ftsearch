@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1]
+
+- Replace deprecated DataExtension with Extension
+
+
 ## [1.2.0]
 
 - Support for Silverstripe 5
