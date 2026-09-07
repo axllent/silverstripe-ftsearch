@@ -6,17 +6,17 @@ use Axllent\FTSearch\Lib\FTSearchLib;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Convert;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
+use SilverStripe\Model\ModelData;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Versioned\Versioned;
-use SilverStripe\View\ViewableData;
 
 class SearchEngine
 {
     /**
-     * Dataobjects to index
+     * DataObjects to index
      *
      * @var array
      */
@@ -49,11 +49,11 @@ class SearchEngine
     private static $title_score = 2;
 
     /**
-     * Scor weight for content
+     * Score weight for content
      *
      * @var int
      */
-    private static $content_score = 2;
+    private static $content_score = 1;
 
     /**
      * Length of excerpt
@@ -70,7 +70,7 @@ class SearchEngine
     private static $excerpt_ending = '...';
 
     /**
-     * CSS class to apply to mathing words in excerpt
+     * CSS class to apply to matching words in excerpt
      *
      * @var string
      */
@@ -84,7 +84,7 @@ class SearchEngine
      *
      * @return ArrayList
      */
-    public static function search($search = false, $classnames = [])
+    public static function search($search = '', $classnames = [])
     {
         $search_limit      = Config::inst()->get(self::class, 'search_limit');
         $title_score       = Config::inst()->get(self::class, 'title_score');
@@ -99,6 +99,12 @@ class SearchEngine
             $search = substr($search, 0, 150);
         }
 
+        // Score weights come from config (developer-controlled) but cast defensively.
+        $title_score   = (int) $title_score;
+        $content_score = (int) $content_score;
+
+        // SQLSelect does not support bound parameters in the SELECT clause,
+        // so the score expression falls back to raw2sql escaping for $search.
         $search_string = Convert::raw2sql($search);
         $query         = new SQLSelect();
         $query->setFrom('FTSearch');
@@ -108,29 +114,24 @@ class SearchEngine
             AS Score'
         );
 
-        $query->setWhere('MATCH("SearchTitle","SearchContent") AGAINST(\'' . $search_string . '\' IN BOOLEAN MODE)');
+        $query->setWhere([
+            'MATCH("SearchTitle","SearchContent") AGAINST(? IN BOOLEAN MODE)' => $search,
+        ]);
 
         if (!empty($classnames)) {
-            if (is_array($classnames)) {
-                $c = [];
-                foreach ($classnames as $cn) {
-                    array_push($c, "'" . Convert::raw2sql($cn) . "'");
-                }
-                $add_where = implode(',', $c);
-            } else {
-                $add_where = "'" . Convert::raw2sql($classnames) . "'";
-            }
-            $query->addWhere('"ObjectClass" IN (' . $add_where . ')');
+            $cn_array     = is_array($classnames) ? array_values($classnames) : [$classnames];
+            $placeholders = implode(',', array_fill(0, count($cn_array), '?'));
+            $query->addWhere(['"ObjectClass" IN (' . $placeholders . ')' => $cn_array]);
         }
 
         $query->setOrderBy('"Score" DESC');
 
         if (is_numeric($search_limit) && $search_limit > 0) {
-            $query->setLimit($search_limit);
+            $query->setLimit((int) $search_limit);
         }
 
         if (is_numeric($min_score) && $min_score > 0) {
-            $query->addHaving('"Score" >= ' . $min_score);
+            $query->addHaving(['"Score" >= ?' => $min_score]);
         }
 
         $records = $query->execute();
@@ -142,7 +143,7 @@ class SearchEngine
             if (!$do) {
                 continue; // result doesn't exist?
             }
-            $record                = ViewableData::create();
+            $record                = ModelData::create();
             $record->Score         = $row['Score'];
             $record->ObjectClass   = $row['ObjectClass'];
             $search_title          = FTSearchLib::Highlight(htmlspecialchars($row['SearchTitle']), $search);
@@ -182,7 +183,7 @@ class SearchEngine
                 // detect which class we should extend with
                 $ext_prefix = DataObject::has_extension($classname, Versioned::class) ? 'Versioned' : 'NonVersioned';
 
-                $classname::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchExt');
+                $classname::add_extension('Axllent\FTSearch\Extensions\\' . $ext_prefix . 'FTSearchExt');
 
                 $do = DataObject::singleton($classname);
 
@@ -247,10 +248,10 @@ class SearchEngine
 
         if (!DataObject::has_extension(
             $classname,
-            'Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt'
+            'Axllent\FTSearch\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt'
         )
         ) {
-            $classname::add_extension('Axllent\\FTSearch\\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt');
+            $classname::add_extension('Axllent\FTSearch\Extensions\\' . $ext_prefix . 'FTSearchTriggerExt');
         }
     }
 }
