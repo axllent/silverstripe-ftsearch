@@ -25,42 +25,74 @@ class FTSearchLib
     {
         $text      = strval($text);
         $phrase    = strval($phrase);
-        $phraseLen = strlen($phrase);
+        $phraseLen = mb_strlen($phrase);
         if ($radius < $phraseLen) {
             $radius = $phraseLen;
         }
 
-        $phrases = preg_split('/\s/', $phrase, -1, PREG_SPLIT_NO_EMPTY);
+        $phrases = preg_split('/\s/u', $phrase, -1, PREG_SPLIT_NO_EMPTY);
 
-        foreach ($phrases as $phrase) {
-            $pos = strpos(strtolower($text), strtolower($phrase));
-            if ($pos > -1) {
+        $pos = false;
+        foreach ($phrases as $p) {
+            $pos = mb_stripos($text, $p);
+            if (false !== $pos) {
+                $phrase    = $p;
+                $phraseLen = mb_strlen($p);
+
                 break;
             }
         }
 
         $startPos = 0;
-        if ($pos > $radius) {
+        if (false !== $pos && $pos > $radius) {
             $startPos = $pos - $radius;
         }
 
-        $textLen = strlen($text);
+        $textLen = mb_strlen($text);
 
-        $endPos = $pos + $phraseLen + $radius;
+        $endPos = (false === $pos ? 0 : $pos) + $phraseLen + $radius;
         if ($endPos >= $textLen) {
             $endPos = $textLen;
         }
 
-        $excerpt = substr($text, $startPos, $endPos - $startPos);
-        if (0 != $startPos) {
-            $excerpt = substr_replace($excerpt, $ending, 0, $phraseLen);
+        $excerpt = mb_substr($text, $startPos, $endPos - $startPos);
+        if (0 !== $startPos) {
+            $excerpt = self::mbSubstrReplace($excerpt, $ending, 0, $phraseLen);
         }
 
-        if ($endPos != $textLen) {
-            $excerpt = substr_replace($excerpt, $ending, -$phraseLen);
+        if ($endPos !== $textLen) {
+            $excerpt = self::mbSubstrReplace($excerpt, $ending, -$phraseLen);
         }
 
         return $excerpt;
+    }
+
+    /**
+     * Multibyte-safe substr_replace. PHP's built-in substr_replace operates on
+     * bytes, which can split multibyte characters mid-codepoint.
+     *
+     * @param string   $string      Input string
+     * @param string   $replacement Replacement string
+     * @param int      $start       Start offset (chars, may be negative)
+     * @param null|int $length      Length to replace (chars, may be negative or null)
+     *
+     * @return string
+     */
+    private static function mbSubstrReplace($string, $replacement, $start, $length = null)
+    {
+        $strLen = mb_strlen($string);
+        if ($start < 0) {
+            $start = max(0, $strLen + $start);
+        }
+        if (null === $length) {
+            $length = $strLen - $start;
+        } elseif ($length < 0) {
+            $length = max(0, $strLen - $start + $length);
+        }
+
+        return mb_substr($string, 0, $start)
+            . $replacement
+            . mb_substr($string, $start + $length);
     }
 
     /**
@@ -84,8 +116,8 @@ class FTSearchLib
             ' ',
             str_replace(
                 [
-                    '', '\\', '+', '*', '?', '[', '^', ']', '$', '(', ')',
-                    '{', '}', '=', '!', '<', '>', '|', ':', '#', '-', '_',
+                    '\\', '+', '*', '?', '[', '^', ']', '$', '(', ')',
+                    '{', '}', '=', '!', '<', '>', '|', ':', '#',
                 ],
                 '',
                 $q
@@ -93,7 +125,7 @@ class FTSearchLib
         );
         for ($i = 0; $i < sizeof($q); ++$i) {
             $c = preg_replace(
-                '/(' . preg_quote($q[$i], '/') . ')(?![^<]*>)/i',
+                '/(' . preg_quote($q[$i], '/') . ')(?![^<]*>)/iu',
                 '<span class="' . htmlspecialchars($excerpt_css_class) . '">${1}</span>',
                 $c
             );
@@ -195,7 +227,7 @@ class FTSearchLib
      *
      * @param DataObject $obj DO to index
      *
-     * @return null
+     * @return void
      */
     public static function updateSearchRecord($obj)
     {
@@ -243,7 +275,7 @@ class FTSearchLib
                         $so->delete(); // delete the object
                     }
 
-                    return false;
+                    return;
                 }
                 if (!$so) {
                     $so = FTSearch::create();
