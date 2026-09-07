@@ -6,6 +6,6 @@ FTSearch can be installed with composer:
 composer require axllent/silverstripe-ftsearch
 ```
 
-After installing the module don't forget to run a `/dev/build`.
+After installing the module don't forget to run a `/dev/build` / `vendor/bin/sake tasks:RebuildFTSearchDB`.
 
 Once installed you will need to configure FTSearch (see [Configuration](Configuration.md)).
